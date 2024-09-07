@@ -4,7 +4,9 @@ const Users = require("./model/authModel");
 const dotenv = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { validateRegistration, validateLogin } = require("./middleware/validations");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const validateToken = require("./middleware/validateAuth");
+const sendUserEmail = require("./sendEmail");
 
 const app = express();
 
@@ -48,6 +50,8 @@ app.post("/register", validateRegistration, async (req, res) => {
 
   // Send Users Email
 
+  await sendUserEmail(email)
+
   return res.status(200).json({
     message: "Successful",
     user: newUser,
@@ -75,11 +79,6 @@ app.post("/login", validateLogin, async (req, res)=>{
 
 try {
 
-    // if(!req.staff){
-    //     return res.status(401).json({message: "Access Denied, Invalid Authentication"})
-    // }
-    // Payload
-
     const { email, password } = req.body
 
     const user = await Users.findOne({email})
@@ -97,13 +96,15 @@ try {
     // Generating Tokens
     // Access Token
 
-    const accessToken = jwt.sign({user}, `${process.env.ACCESS_TOKEN}`, {expiresIn: "5m"})
+    const accessToken = jwt.sign({user}, `${process.env.ACCESS_TOKEN}`, {expiresIn: "30m"})
 
     const refreshToken = jwt.sign({user}, `${process.env.REFRESH_TOKEN}`, {expiresIn: "5m"})
 
+
+    await sendUserEmail(email)
+
     return res.status(200).json({
         message: "Login Successful",
-        OTP,
         accessToken,
         user
     })
@@ -113,3 +114,20 @@ try {
 }
 
 })
+
+
+
+// Protected Routes
+app.post("/auth", validateToken, (req, res)=>{
+
+  return res.status(200).json({
+    message: "Successful",
+    user: req.user
+  })
+})
+
+
+
+
+
+

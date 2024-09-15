@@ -2,7 +2,7 @@ const express = require("express");
 const connectToDatabase = require("./db");
 const Users = require("./model/authModel");
 const dotenv = require("dotenv").config();
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const { validateRegistration, validateLogin } = require("./middleware/validations");
 const jwt = require("jsonwebtoken");
 const validateToken = require("./middleware/validateAuth");
@@ -23,7 +23,10 @@ app.listen(PORT, () => {
 });
 
 app.get("/", (req, res) => {
-  return res.status(200).json({ message: "Welcome to Youthrive Backend!" });
+  return res.status(200).json({ 
+    message: "Welcome to Youthrive Backend!" ,
+    message2: "Testing CICD!" 
+  });
 });
 
 app.post("/register", validateRegistration, async (req, res) => {
@@ -74,6 +77,12 @@ app.get("/user/:id", async (req, res) => {
 });
 
 
+// www.yourwebsite.com/api
+
+// MVC Rule
+// Models
+// Views = Routes
+// Controllers
 
 app.post("/login", validateLogin, async (req, res)=>{
 
